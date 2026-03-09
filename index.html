@@ -489,11 +489,27 @@
   .half-score-chip .half-label { font-size:10px; font-weight:700; color:var(--gray); }
   .half-score-chip .half-num { font-family:'Oswald',sans-serif; font-size:15px; font-weight:700; color:var(--green-dark); }
   .half-score-chip .half-sep { color:var(--gray); font-size:12px; }
-  .halves-container { display:grid; grid-template-columns:1fr 1fr; }
-  .half-block { padding:14px 16px; border-top:1px solid var(--gray-light); }
-  .half-block:first-child:not(.full-width) { border-right:1px solid var(--gray-light); }
-  .half-block.full-width { grid-column:1/-1; }
-  .half-block-title { font-size:11px; font-weight:700; color:#fff; background:var(--green); display:inline-block; padding:2px 10px; border-radius:20px; margin-bottom:10px; }
+  .halves-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--gray-light);
+  }
+  .half-block {
+    padding: 14px 16px;
+    /* 内部を4行グリッドにして前半・後半で行を揃える */
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    align-content: start;
+    gap: 10px 0;
+  }
+  .half-block:first-child:not(.full-width) { border-right: 1px solid var(--gray-light); }
+  .half-block.full-width { grid-column: 1/-1; display: block; }
+  .half-section-title { }
+  .half-section-players,
+  .half-section-scorers,
+  .half-section-video { }
+  .half-section-video { margin-bottom: 0; }
+  .half-block-title { font-size:11px; font-weight:700; color:#fff; background:var(--green); display:inline-block; padding:2px 10px; border-radius:20px; margin-bottom:0; }
   .half-block-title.second { background:var(--green-dark); }
   .no-data { font-size:11px; color:var(--gray); }
   @media (max-width:500px) {
@@ -834,10 +850,19 @@ function renderMatches() {
         : '<span class="no-data">なし</span>';
 
       return `<div class="half-block${fw}">
-        <div class="half-block-title${tc}">${h.label}</div>
-        <div class="detail-label">出場選手</div><div>${playerTags || '<span class="no-data">未入力</span>'}</div>
-        <div class="detail-label">得点者</div><div>${scorerTags}</div>
-        <div class="detail-label">動画</div><div>${ytBtn}</div>
+        <div class="half-section-title"><div class="half-block-title${tc}">${h.label}</div></div>
+        <div class="half-section-players">
+          <div class="detail-label">出場選手</div>
+          <div class="detail-content">${playerTags || '<span class="no-data">未入力</span>'}</div>
+        </div>
+        <div class="half-section-scorers">
+          <div class="detail-label">得点者</div>
+          <div class="detail-content">${scorerTags}</div>
+        </div>
+        <div class="half-section-video">
+          <div class="detail-label">動画</div>
+          <div class="detail-content">${ytBtn}</div>
+        </div>
       </div>`;
     }).join('');
 
@@ -869,6 +894,8 @@ function renderMatches() {
         <div class="halves-container">${halvesHtml}</div>
       </div>`;
   }).join('');
+  // 前半・後半の各セクション高さを同期
+  requestAnimationFrame(syncHalfHeights);
 }
 
 // ── 成績表 ──
@@ -953,13 +980,39 @@ function renderRanking() {
   }).join('');
 }
 
-// ── タブ切り替え ──
+// ── 前半・後半の各セクション高さを同期 ──
+function syncHalfHeights() {
+  document.querySelectorAll('.halves-container').forEach(container => {
+    const blocks = container.querySelectorAll('.half-block:not(.full-width)');
+    if (blocks.length !== 2) return;
+    const sections = ['half-section-title', 'half-section-players', 'half-section-scorers', 'half-section-video'];
+    sections.forEach(cls => {
+      const a = blocks[0].querySelector('.' + cls);
+      const b = blocks[1].querySelector('.' + cls);
+      if (!a || !b) return;
+      // いったんautoに戻してから計測
+      a.style.height = 'auto';
+      b.style.height = 'auto';
+      const h = Math.max(a.offsetHeight, b.offsetHeight);
+      a.style.height = h + 'px';
+      b.style.height = h + 'px';
+    });
+  });
+}
+
+
 function showTab(name) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   event.currentTarget.classList.add('active');
+  if (name === 'matches') requestAnimationFrame(syncHalfHeights);
 }
+
+window.addEventListener('resize', () => {
+  const matchTab = document.getElementById('tab-matches');
+  if (matchTab && matchTab.classList.contains('active')) syncHalfHeights();
+});
 
 // ── 初期化 ──
 async function init() {

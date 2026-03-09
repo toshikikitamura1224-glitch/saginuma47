@@ -408,111 +408,9 @@
     .player-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
   }
-
-  /* ── PASSWORD SCREEN ── */
-  #password-screen {
-    position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 60%, var(--green-light) 100%);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  #password-screen::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(
-      45deg,
-      rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px,
-      transparent 2px, transparent 20px
-    );
-  }
-  .pw-card {
-    position: relative; z-index: 1;
-    background: #fff; border-radius: 20px;
-    padding: 40px 36px; width: 100%; max-width: 380px;
-    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  }
-  .pw-emblem {
-    width: 72px; height: 72px; background: var(--gold);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700;
-    color: var(--green-dark); margin: 0 auto 16px;
-    box-shadow: 0 4px 16px rgba(240,180,41,0.4);
-  }
-  .pw-title {
-    font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700;
-    color: var(--green-dark); margin-bottom: 4px;
-  }
-  .pw-subtitle { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
-  .pw-input {
-    width: 100%; padding: 13px 16px;
-    border: 2px solid var(--gray-light); border-radius: 10px;
-    font-size: 20px; text-align: center;
-    font-family: 'Noto Sans JP', sans-serif;
-    outline: none; transition: border-color 0.2s;
-    letter-spacing: 6px; margin-bottom: 14px;
-  }
-  .pw-input:focus { border-color: var(--green-light); }
-  .pw-input.error { border-color: #e74c3c; animation: shake 0.3s; }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
-  }
-  .pw-btn {
-    width: 100%; padding: 13px;
-    background: linear-gradient(90deg, var(--green-dark), var(--green));
-    color: #fff; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 700;
-    font-family: 'Noto Sans JP', sans-serif;
-    cursor: pointer; transition: opacity 0.2s; letter-spacing: 1px;
-  }
-  .pw-btn:hover { opacity: 0.9; }
-  .pw-error { color: #e74c3c; font-size: 13px; margin-top: 10px; min-height: 18px; }
-  .pw-note { font-size: 11px; color: var(--gray); margin-top: 20px; line-height: 1.6; }
-
-  /* ── NEW MATCH CARD ── */
-  .match-meta { flex: 1; min-width: 0; }
-  .match-name { font-weight: 700; font-size: 14px; color: var(--dark); }
-  .match-opponent { font-size: 12px; color: var(--gray); margin-top: 2px; }
-  .total-score-area {
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #f0f9f3, #fff);
-    border-bottom: 2px solid var(--gray-light);
-  }
-  .total-label { font-size:11px; font-weight:700; color:var(--gray); letter-spacing:1px; text-align:center; margin-bottom:8px; }
-  .half-scores { display:flex; justify-content:center; gap:16px; margin-top:10px; flex-wrap:wrap; }
-  .half-score-chip { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid rgba(26,122,60,0.15); border-radius:20px; padding:4px 14px; }
-  .half-score-chip .half-label { font-size:10px; font-weight:700; color:var(--gray); }
-  .half-score-chip .half-num { font-family:'Oswald',sans-serif; font-size:15px; font-weight:700; color:var(--green-dark); }
-  .half-score-chip .half-sep { color:var(--gray); font-size:12px; }
-  .halves-container { display:grid; grid-template-columns:1fr 1fr; }
-  .half-block { padding:14px 16px; border-top:1px solid var(--gray-light); }
-  .half-block:first-child:not(.full-width) { border-right:1px solid var(--gray-light); }
-  .half-block.full-width { grid-column:1/-1; }
-  .half-block-title { font-size:11px; font-weight:700; color:#fff; background:var(--green); display:inline-block; padding:2px 10px; border-radius:20px; margin-bottom:10px; }
-  .half-block-title.second { background:var(--green-dark); }
-  .no-data { font-size:11px; color:var(--gray); }
-  @media (max-width:500px) {
-    .halves-container { grid-template-columns:1fr; }
-    .half-block:first-child { border-right:none; border-bottom:1px solid var(--gray-light); }
-  }
 </style>
 </head>
 <body>
-
-<!-- ===== PASSWORD SCREEN ===== -->
-<div id="password-screen">
-  <div class="pw-card">
-    <div class="pw-emblem">SC</div>
-    <div class="pw-title">さぎぬまSC 47期</div>
-    <div class="pw-subtitle">保護者専用ページです<br>パスワードを入力してください</div>
-    <input type="password" id="pw-input" class="pw-input" placeholder="••••••"
-      onkeydown="if(event.key==='Enter') checkPassword()" maxlength="20" autofocus>
-    <button class="pw-btn" onclick="checkPassword()">ログイン</button>
-    <div class="pw-error" id="pw-error"></div>
-    <div class="pw-note">パスワードはチームの担当者にお問い合わせください</div>
-  </div>
-</div>
 
 <header>
   <div class="header-inner">
@@ -594,154 +492,161 @@
 </main>
 
 <script>
-// ── パスワード設定 ──
-const SITE_PASSWORD = 'saginuma47';
-function checkPassword() {
-  const input = document.getElementById('pw-input');
-  const errorEl = document.getElementById('pw-error');
-  if (input.value.trim() === SITE_PASSWORD) {
-    sessionStorage.setItem('sc47_auth','1');
-    document.getElementById('password-screen').style.display='none';
-    init();
-  } else {
-    input.classList.add('error');
-    errorEl.textContent='パスワードが違います。';
-    input.value='';
-    setTimeout(()=>input.classList.remove('error'),400);
-  }
-}
-if(sessionStorage.getItem('sc47_auth')==='1'){
-  document.getElementById('password-screen').style.display='none';
-}
-
-// ── API設定 ──
+// ============================
+//  設定：Apps Script API URL
+// ============================
 const API_URL = 'https://script.google.com/macros/s/AKfycbzXQpxCdaHleuy9X8DH3QLw7Wra9LrMpsd2_UUfUR-w01rmS9Fq_kMeXnU3_SCvQxYU/exec';
 
+// ============================
+//  グローバルデータ
+// ============================
 let PLAYERS = [];
-let MATCHES = []; // 試合単位にまとめたデータ
+let MATCHES = [];
+let APPEARANCES = [];
 let currentFilter = 'all';
 let currentRankingMode = 'all';
 
-// ── データ取得 ──
-async function fetchSheet(name) {
-  const res = await fetch(API_URL + '?sheet=' + encodeURIComponent(name));
+// ============================
+//  データ取得
+// ============================
+async function fetchSheet(sheetName) {
+  const res = await fetch(`${API_URL}?sheet=${encodeURIComponent(sheetName)}`);
   return res.json();
 }
 
 function showLoading(id, msg='読み込み中...') {
   const el = document.getElementById(id);
-  if(el) el.innerHTML = '<div class="empty-msg">⏳ ' + msg + '</div>';
-}
-function showError(id, msg) {
-  const el = document.getElementById(id);
-  if(el) el.innerHTML = '<div class="empty-msg" style="color:#c0392b;">⚠️ ' + msg + '</div>';
+  if(el) el.innerHTML = `<div class="empty-msg">⏳ ${msg}</div>`;
 }
 
-// ── データ変換 ──
-function parseDate(val) {
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = `<div class="empty-msg" style="color:#c0392b;">⚠️ ${msg}</div>`;
+}
+
+// ============================
+//  データ変換
+// ============================
+function parseSheetData(raw) {
+  // 選手マスタ
+  PLAYERS = raw.players
+    .filter(r => r['背番号'] !== '' && r['背番号'] != null)
+    .map(r => ({
+      no:     Number(r['背番号']),
+      name:   r['名前（漢字）'] || '',
+      kana:   r['名前（ひらがな）'] || '',
+      school: r['在籍小学校'] || '',
+    }));
+
+  // 試合結果（②試合結果）と出場記録（③出場記録）を結合
+  const matchMap = {};
+  raw.matches
+    .filter(r => r['試合ID'])
+    .forEach(r => {
+      const id = String(r['試合ID']);
+      matchMap[id] = {
+        id,
+        date:      formatDate(r['日付']),
+        type:      r['種別'] || '',
+        tournament:r['大会名 / 対戦相手名'] || '',
+        scoreUs:   Number(r['自チーム\n得点'] ?? r['自チーム得点'] ?? 0),
+        scoreThem: Number(r['相手\n得点'] ?? r['相手得点'] ?? 0),
+        youtube:   r['YouTube URL'] || '',
+        starters:  [],
+        subs:      [],
+        scorers:   [],
+      };
+    });
+
+  // 出場記録を各試合にマージ
+  const subTrack = {}; // 各試合の各選手の出場開始を追跡
+  raw.appearances
+    .filter(r => r['試合ID'] && r['背番号'])
+    .forEach(r => {
+      const id     = String(r['試合ID']);
+      const no     = Number(r['背番号']);
+      const start  = Number(r['出場開始\n(分)'] ?? r['出場開始(分)'] ?? 0);
+      const end    = Number(r['出場終了\n(分)'] ?? r['出場終了(分)'] ?? 40);
+      const goals  = Number(r['得点数'] || 0);
+      const note   = r['備考'] || '';
+
+      if(!matchMap[id]) return;
+      const m = matchMap[id];
+
+      if(start === 0) {
+        m.starters.push(no);
+      } else {
+        // 交代IN：対応するOUT選手を探す（同じ試合で途中終了した先発）
+        const outPlayer = m.starters.find(sno => {
+          const outRec = raw.appearances.find(a =>
+            String(a['試合ID']) === id &&
+            Number(a['背番号']) === sno &&
+            Number(a['出場終了\n(分)'] ?? a['出場終了(分)'] ?? 40) === start
+          );
+          return !!outRec;
+        });
+        m.subs.push({ out: outPlayer || null, in: no, minute: start });
+      }
+      if(goals > 0) {
+        const existing = m.scorers.find(s => s.no === no);
+        if(existing) existing.goals += goals;
+        else m.scorers.push({ no, goals });
+      }
+    });
+
+  MATCHES = Object.values(matchMap).sort((a,b) => a.date.localeCompare(b.date));
+}
+
+function formatDate(val) {
   if(!val) return '';
-  if(typeof val === 'string' && val.match(/^\d{4}/)) {
-    return val.substring(0,10).replace(/-/g,'/');
-  }
-  try {
+  if(typeof val === 'string') return val;
+  // Googleスプレッドシートから日付がDate/数値で来る場合
+  if(val instanceof Date || (typeof val === 'object' && val.getFullYear)) {
     const d = new Date(val);
-    if(!isNaN(d)) return d.getFullYear()+'/'+(String(d.getMonth()+1).padStart(2,'0'))+'/'+String(d.getDate()).padStart(2,'0');
-  } catch(e){}
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  }
   return String(val);
 }
 
-function buildMatchData(matchRows, appearRows) {
-  // 試合IDでグループ化
-  const matchMap = {};
-  matchRows.forEach(r => {
-    const id = r['試合ID'];
-    if(!matchMap[id]) {
-      matchMap[id] = {
-        id,
-        date: parseDate(r['日付']),
-        type: r['種別'] || '',
-        tournament: r['大会名'] || '',
-        opponent: r['対戦相手名'] || r['対戦相手'] || '',
-        halves: [],
-        scoreUs: 0,
-        scoreThem: 0,
-      };
-    }
-    const halfLabel = r['前後半'] || '前後半';
-    const hu = Number(r['自チーム
-得点'] ?? r['自チーム得点'] ?? 0);
-    const ht = Number(r['相手
-得点'] ?? r['相手得点'] ?? 0);
-    matchMap[id].halves.push({
-      label: halfLabel,
-      scoreUs: hu,
-      scoreThem: ht,
-      youtube: r['YouTube URL'] || '',
-      players: [],
-      scorers: [],
-    });
-    matchMap[id].scoreUs += hu;
-    matchMap[id].scoreThem += ht;
-  });
+// ============================
+//  ユーティリティ
+// ============================
+function playerByNo(no) { return PLAYERS.find(p => p.no === no); }
 
-  // 出場記録を前後半に紐付け
-  appearRows.forEach(r => {
-    const id = r['試合ID'];
-    const halfLabel = r['前後半'];
-    const no = Number(r['背番号']);
-    const goals = Number(r['得点数'] || 0);
-    const start = Number(r['出場開始
-(分)'] ?? r['出場開始(分)'] ?? 0);
-    const end   = Number(r['出場終了
-(分)'] ?? r['出場終了(分)'] ?? 0);
-    if(!matchMap[id]) return;
-    const half = matchMap[id].halves.find(h => h.label === halfLabel);
-    if(!half) return;
-    half.players.push({no, start, end});
-    if(goals > 0) {
-      const ex = half.scorers.find(s => s.no === no);
-      if(ex) ex.goals += goals;
-      else half.scorers.push({no, goals});
-    }
-  });
-
-  // 出場開始順にソート
-  Object.values(matchMap).forEach(m => {
-    m.halves.forEach(h => {
-      h.players.sort((a,b) => a.start - b.start);
-    });
-  });
-
-  return Object.values(matchMap).sort((a,b) => a.date.localeCompare(b.date));
-}
-
-// ── ユーティリティ ──
-function playerByNo(no){ return PLAYERS.find(p => p.no === no); }
-function firstName(name) {
-  if(!name) return '?';
-  const parts = name.split('\u3000');
-  return parts.length > 1 ? parts[1] : name;
-}
 function getResult(us, them) {
   if(us > them) return {label:'WIN', cls:'result-win'};
   if(us < them) return {label:'LOSE', cls:'result-lose'};
   return {label:'DRAW', cls:'result-draw'};
 }
 
-// ── 選手情報 ──
+function lastName(name) {
+  if(!name) return '?';
+  const parts = name.split(/[\s　]/);
+  return parts.length > 1 ? parts[1] : name;
+}
+
+// ============================
+//  選手情報タブ
+// ============================
 function renderPlayers() {
   const grid = document.getElementById('playerGrid');
-  if(!PLAYERS.length){ grid.innerHTML='<div class="empty-msg">選手データがありません</div>'; return; }
+  if(!PLAYERS.length) {
+    grid.innerHTML = '<div class="empty-msg">選手データがありません</div>';
+    return;
+  }
   grid.innerHTML = PLAYERS.map(p => `
     <div class="player-card">
       <div class="player-number">#${p.no}</div>
-      <div class="player-name">${firstName(p.name)}</div>
-      <div class="player-kana">${p.name}</div>
+      <div class="player-name">${p.name}</div>
+      <div class="player-kana">${p.kana}</div>
       <div class="player-school">${p.school}</div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
-// ── 試合結果 ──
+// ============================
+//  試合結果タブ
+// ============================
 function filterMatches(type, btn) {
   currentFilter = type;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -751,113 +656,124 @@ function filterMatches(type, btn) {
 
 function renderMatches() {
   const list = document.getElementById('matchList');
-  const filtered = currentFilter === 'all' ? MATCHES : MATCHES.filter(m => m.type === currentFilter);
-  if(!filtered.length){ list.innerHTML='<div class="empty-msg">該当する試合がありません</div>'; return; }
+  const filtered = currentFilter === 'all'
+    ? MATCHES
+    : MATCHES.filter(m => m.type === currentFilter);
+
+  if(!filtered.length) {
+    list.innerHTML = '<div class="empty-msg">該当する試合がありません</div>';
+    return;
+  }
 
   list.innerHTML = [...filtered].reverse().map(m => {
     const res = getResult(m.scoreUs, m.scoreThem);
-    const hasTwo = m.halves.length === 2;
-
-    const halfSummary = hasTwo ? `
-      <div class="half-scores">
-        ${m.halves.map(h => `
-          <div class="half-score-chip">
-            <span class="half-label">${h.label}</span>
-            <span class="half-num">${h.scoreUs}</span>
-            <span class="half-sep">–</span>
-            <span class="half-num">${h.scoreThem}</span>
-          </div>`).join('')}
-      </div>` : '';
-
-    const halvesHtml = m.halves.map((h, i) => {
-      const fw = m.halves.length === 1 ? ' full-width' : '';
-      const tc = i === 1 ? ' second' : '';
-
-      const playerTags = h.players.map(ap => {
-        const p = playerByNo(ap.no);
-        const fn = p ? firstName(p.name) : '?';
-        const subInfo = ap.start > 0 ? ` <span style="font-size:10px;color:var(--gray)">(${ap.start}分IN)</span>` :
-                        ap.end < 20 && ap.end > 0 ? ` <span style="font-size:10px;color:var(--gray)">(${ap.end}分OUT)</span>` : '';
-        return `<span class="player-tag">#${ap.no} ${fn}${subInfo}</span>`;
-      }).join('');
-
-      const scorerTags = h.scorers.length
-        ? h.scorers.map(s => {
-            const p = playerByNo(s.no);
-            return `<span class="player-tag scorer-tag">⚽ ${p ? firstName(p.name) : '?'} ×${s.goals}</span>`;
-          }).join('')
-        : '<span class="no-data">なし</span>';
-
-      const ytBtn = h.youtube
-        ? `<a href="${h.youtube}" target="_blank" class="yt-link">▶ YouTube</a>`
-        : '<span class="no-data">なし</span>';
-
-      return `<div class="half-block${fw}">
-        <div class="half-block-title${tc}">${h.label}</div>
-        <div class="detail-label">出場選手</div><div>${playerTags || '<span class="no-data">未入力</span>'}</div>
-        <div class="detail-label">得点者</div><div>${scorerTags}</div>
-        <div class="detail-label">動画</div><div>${ytBtn}</div>
-      </div>`;
+    const subText = m.subs.length
+      ? m.subs.map(s => {
+          const pOut = s.out ? playerByNo(s.out) : null;
+          const pIn  = playerByNo(s.in);
+          const outName = pOut ? lastName(pOut.name) : '?';
+          const inName  = pIn  ? lastName(pIn.name)  : '?';
+          return `<span class="player-tag">🔄 ${outName} → ${inName} (${s.minute}分)</span>`;
+        }).join('')
+      : '<span style="color:var(--gray);font-size:12px;">なし</span>';
+    const scorerText = m.scorers.length
+      ? m.scorers.map(s => {
+          const p = playerByNo(s.no);
+          return `<span class="player-tag scorer-tag">⚽ ${p ? lastName(p.name) : '?'} ×${s.goals}</span>`;
+        }).join('')
+      : '<span style="color:var(--gray);font-size:12px;">なし</span>';
+    const starterText = m.starters.map(no => {
+      const p = playerByNo(no);
+      return `<span class="player-tag">#${no} ${p ? lastName(p.name) : '?'}</span>`;
     }).join('');
 
     return `
       <div class="match-card">
         <div class="match-header">
           <span class="match-badge ${m.type==='公式戦'?'badge-official':'badge-trm'}">${m.type}</span>
-          <div class="match-meta">
+          <div>
             <div class="match-name">${m.tournament}</div>
-            <div class="match-opponent">vs ${m.opponent}</div>
+            <div class="match-date">${m.date}</div>
           </div>
-          <div class="match-date">${m.date}</div>
-          <span class="score-result ${res.cls}">${res.label}</span>
+          <span class="score-result ${res.cls}" style="margin-left:auto;">${res.label}</span>
         </div>
-        <div class="total-score-area">
-          <div class="total-label">TOTAL</div>
+        <div class="match-body">
           <div class="score-row">
-            <div class="team-name">さぎぬまSC<small>47期</small></div>
+            <div class="team-name" style="text-align:right;">さぎぬまSC<br><small style="font-weight:400;color:var(--gray);font-size:11px;">47期</small></div>
             <div class="score-box">
               <div class="score-num">${m.scoreUs}</div>
               <div class="score-sep">–</div>
               <div class="score-num">${m.scoreThem}</div>
             </div>
-            <div class="team-name">${m.opponent}</div>
+            <div class="team-name">${m.tournament.replace(/.*vs\s*/i,'') || '相手チーム'}</div>
           </div>
-          ${halfSummary}
+          <div class="match-details">
+            <div class="detail-block">
+              <div class="detail-label">先発メンバー</div>
+              <div class="detail-content">${starterText || '<span style="color:var(--gray);font-size:12px;">未入力</span>'}</div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">交代</div>
+              <div class="detail-content">${subText}</div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">得点者</div>
+              <div class="detail-content">${scorerText}</div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">動画</div>
+              <div class="detail-content">
+                ${m.youtube
+                  ? `<a href="${m.youtube}" target="_blank" class="yt-link">▶ YouTube で見る</a>`
+                  : '<span style="color:var(--gray);font-size:12px;">なし</span>'
+                }
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="halves-container">${halvesHtml}</div>
-      </div>`;
+      </div>
+    `;
   }).join('');
 }
 
-// ── 成績表 ──
+// ============================
+//  成績表タブ
+// ============================
 function calcStats(matchList) {
   let w=0,d=0,l=0,gf=0,ga=0;
   matchList.forEach(m => {
-    gf+=m.scoreUs; ga+=m.scoreThem;
-    const r=getResult(m.scoreUs,m.scoreThem);
-    if(r.label==='WIN')w++; else if(r.label==='DRAW')d++; else l++;
+    gf += m.scoreUs; ga += m.scoreThem;
+    const r = getResult(m.scoreUs, m.scoreThem);
+    if(r.label==='WIN') w++;
+    else if(r.label==='DRAW') d++;
+    else l++;
   });
   return {w,d,l,gf,ga,games:matchList.length};
 }
 
 function renderStats() {
   const now = new Date();
-  const cm = now.getMonth()+1, cy = now.getFullYear();
-  document.getElementById('currentMonthLabel').textContent = cy+'年'+cm+'月';
-  const thisMonth = MATCHES.filter(m => {
+  const currentMonth = now.getMonth() + 1;
+  const currentYear  = now.getFullYear();
+  document.getElementById('currentMonthLabel').textContent = `${currentYear}年${currentMonth}月`;
+
+  const thisMonthMatches = MATCHES.filter(m => {
     const d = new Date(m.date.replace(/\//g,'-'));
-    return d.getMonth()+1===cm && d.getFullYear()===cy;
+    return d.getMonth()+1 === currentMonth && d.getFullYear() === currentYear;
   });
-  const ms = calcStats(thisMonth), ts = calcStats(MATCHES);
-  const mk = s => `
+  const monthS = calcStats(thisMonthMatches);
+  const totalS = calcStats(MATCHES);
+
+  const makeStats = (s) => `
     <div class="stat-card"><div class="stat-label">試合数</div><div class="stat-value">${s.games}</div><div class="stat-sub">games</div></div>
-    <div class="stat-card"><div class="stat-label">勝利</div><div class="stat-value" style="color:var(--green-light)">${s.w}</div><div class="stat-sub">wins</div></div>
-    <div class="stat-card"><div class="stat-label">引分</div><div class="stat-value" style="color:var(--gold-dark)">${s.d}</div><div class="stat-sub">draws</div></div>
-    <div class="stat-card"><div class="stat-label">敗戦</div><div class="stat-value" style="color:#c0392b">${s.l}</div><div class="stat-sub">losses</div></div>
+    <div class="stat-card"><div class="stat-label">勝利</div><div class="stat-value" style="color:var(--green-light);">${s.w}</div><div class="stat-sub">wins</div></div>
+    <div class="stat-card"><div class="stat-label">引分</div><div class="stat-value" style="color:var(--gold-dark);">${s.d}</div><div class="stat-sub">draws</div></div>
+    <div class="stat-card"><div class="stat-label">敗戦</div><div class="stat-value" style="color:#c0392b;">${s.l}</div><div class="stat-sub">losses</div></div>
     <div class="stat-card"><div class="stat-label">総得点</div><div class="stat-value">${s.gf}</div><div class="stat-sub">goals for</div></div>
-    <div class="stat-card"><div class="stat-label">総失点</div><div class="stat-value">${s.ga}</div><div class="stat-sub">goals against</div></div>`;
-  document.getElementById('monthStats').innerHTML = mk(ms);
-  document.getElementById('totalStats').innerHTML = mk(ts);
+    <div class="stat-card"><div class="stat-label">総失点</div><div class="stat-value">${s.ga}</div><div class="stat-sub">goals against</div></div>
+  `;
+  document.getElementById('monthStats').innerHTML = makeStats(monthS);
+  document.getElementById('totalStats').innerHTML = makeStats(totalS);
   renderRanking();
 }
 
@@ -869,67 +785,88 @@ function switchRanking(mode, btn) {
 }
 
 function renderRanking() {
-  const targets = currentRankingMode==='official' ? MATCHES.filter(m=>m.type==='公式戦') : MATCHES;
-  const gm = {};
-  targets.forEach(m => m.halves.forEach(h => h.scorers.forEach(s => {
-    gm[s.no] = (gm[s.no]||0) + s.goals;
-  })));
-  const ranking = Object.entries(gm).map(([no,goals])=>({no:Number(no),goals})).sort((a,b)=>b.goals-a.goals);
-  if(!ranking.length){ document.getElementById('rankingList').innerHTML='<div class="empty-msg">得点データがありません</div>'; return; }
-  const rc=['gold','silver','bronze'];
+  const targetMatches = currentRankingMode === 'official'
+    ? MATCHES.filter(m => m.type === '公式戦')
+    : MATCHES;
+
+  const goalMap = {};
+  targetMatches.forEach(m => {
+    m.scorers.forEach(s => {
+      goalMap[s.no] = (goalMap[s.no] || 0) + s.goals;
+    });
+  });
+
+  const ranking = Object.entries(goalMap)
+    .map(([no, goals]) => ({no: Number(no), goals}))
+    .sort((a,b) => b.goals - a.goals);
+
+  if(!ranking.length) {
+    document.getElementById('rankingList').innerHTML = '<div class="empty-msg">得点データがありません</div>';
+    return;
+  }
+
+  const rankClasses = ['gold','silver','bronze'];
   document.getElementById('rankingList').innerHTML = ranking.map((r,i) => {
     const p = playerByNo(r.no);
-    const fn = p ? firstName(p.name) : '?';
-    return `<div class="rank-row">
-      <div class="rank-pos ${i<3?rc[i]:'other'}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
-      <div class="rank-num-badge">${r.no}</div>
-      <div class="rank-name">${fn}<div class="rank-kana">${p?p.name:''}</div></div>
-      <div class="rank-goals">${r.goals}<span> 点</span></div>
-    </div>`;
+    const posCls   = i < 3 ? rankClasses[i] : 'other';
+    const posLabel = i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}`;
+    return `
+      <div class="rank-row">
+        <div class="rank-pos ${posCls}">${posLabel}</div>
+        <div class="rank-num-badge">${r.no}</div>
+        <div class="rank-name">
+          ${p ? p.name : `#${r.no}`}
+          <div class="rank-kana">${p ? p.kana : ''}</div>
+        </div>
+        <div class="rank-goals">${r.goals}<span> 点</span></div>
+      </div>
+    `;
   }).join('');
 }
 
-// ── タブ切り替え ──
+// ============================
+//  タブ切り替え
+// ============================
 function showTab(name) {
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
 }
 
-// ── 初期化 ──
+// ============================
+//  初期化：スプレッドシートから全データ取得
+// ============================
 async function init() {
-  showLoading('playerGrid','選手データを読み込み中...');
-  showLoading('matchList','試合データを読み込み中...');
-  showLoading('monthStats','データを読み込み中...');
-  showLoading('totalStats','');
+  // ローディング表示
+  showLoading('playerGrid', '選手データを読み込み中...');
+  showLoading('matchList',  '試合データを読み込み中...');
+  showLoading('monthStats', 'データを読み込み中...');
+  showLoading('totalStats', '');
   showLoading('rankingList','');
+
   try {
-    const [playersRaw, matchesRaw, appearsRaw] = await Promise.all([
+    const [players, matches, appearances] = await Promise.all([
       fetchSheet('①選手マスタ'),
       fetchSheet('②試合結果'),
       fetchSheet('③出場記録'),
     ]);
-    PLAYERS = playersRaw
-      .filter(r => r['背番号'] !== '' && r['背番号'] != null)
-      .map(r => ({
-        no: Number(r['背番号']),
-        name: r['名前（ひらがな）'] || '',
-        school: r['在籍小学校'] || '',
-      }));
-    MATCHES = buildMatchData(matchesRaw, appearsRaw);
+
+    parseSheetData({ players, matches, appearances });
+
     renderPlayers();
     renderMatches();
     renderStats();
+
   } catch(err) {
     console.error(err);
-    showError('playerGrid','データの読み込みに失敗しました。再読み込みしてください。');
-    showError('matchList','データの読み込みに失敗しました。');
-    showError('monthStats','データの読み込みに失敗しました。');
+    showError('playerGrid', 'データの読み込みに失敗しました。しばらくしてから再読み込みしてください。');
+    showError('matchList',  'データの読み込みに失敗しました。');
+    showError('monthStats', 'データの読み込みに失敗しました。');
   }
 }
 
-if(sessionStorage.getItem('sc47_auth')==='1'){ init(); }
+init();
 </script>
 </body>
 </html>

@@ -238,6 +238,10 @@
   }
   .badge-official { background: var(--green-dark); color: #fff; }
   .badge-trm { background: var(--gold); color: var(--dark); }
+  .badge-green { background: #2ea84f; color: #fff; }
+  .badge-white { background: #e8e8e8; color: #333; border: 1px solid #ccc; }
+  .team-green.active { background: #2ea84f; color: #fff; border-color: #2ea84f; }
+  .team-white.active { background: #555; color: #fff; border-color: #555; }
   .match-date { font-size: 13px; color: var(--gray); }
   .match-name { font-weight: 700; font-size: 14px; color: var(--dark); }
   .match-body { padding: 16px 20px; }
@@ -549,9 +553,15 @@
     <div class="section-title">試合結果</div>
     <div class="filter-row">
       <span style="font-size:13px;color:var(--gray);font-weight:600;">種別：</span>
-      <button class="filter-btn active" onclick="filterMatches('all', this)">すべて</button>
-      <button class="filter-btn" onclick="filterMatches('公式戦', this)">公式戦</button>
-      <button class="filter-btn" onclick="filterMatches('TRM', this)">TRM</button>
+      <button class="filter-btn active" onclick="filterMatches('all', this)" data-group="type">すべて</button>
+      <button class="filter-btn" onclick="filterMatches('公式戦', this)" data-group="type">公式戦</button>
+      <button class="filter-btn" onclick="filterMatches('TRM', this)" data-group="type">TRM</button>
+    </div>
+    <div class="filter-row" style="margin-top:-8px;">
+      <span style="font-size:13px;color:var(--gray);font-weight:600;">チーム：</span>
+      <button class="filter-btn active" onclick="filterMatchesTeam('all', this)" data-group="team">すべて</button>
+      <button class="filter-btn team-green" onclick="filterMatchesTeam('Green', this)" data-group="team">🟢 Green</button>
+      <button class="filter-btn team-white" onclick="filterMatchesTeam('White', this)" data-group="team">⚪ White</button>
     </div>
     <div id="matchList"></div>
   </div>
@@ -559,6 +569,13 @@
   <!-- ===== TAB3: 成績表 ===== -->
   <div id="tab-stats" class="section">
     <div class="section-title">成績表</div>
+
+    <!-- チーム切り替えタブ -->
+    <div class="rank-tabs" style="margin-bottom:20px;">
+      <button class="rank-tab-btn active" onclick="switchStatsTeam('all', this)">全体</button>
+      <button class="rank-tab-btn" onclick="switchStatsTeam('Green', this)">🟢 Green</button>
+      <button class="rank-tab-btn" onclick="switchStatsTeam('White', this)">⚪ White</button>
+    </div>
 
     <!-- 当月成績 -->
     <div class="card" style="margin-bottom:24px;">
@@ -620,7 +637,10 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzXQpxCdaHleuy9X8DH3QLw
 let PLAYERS = [];
 let MATCHES = []; // 試合単位にまとめたデータ
 let currentFilter = 'all';
+let currentTeamFilter = 'all'; // チーム区分フィルター
 let currentRankingMode = 'all';
+let currentRankingTeam = 'all'; // ランキング用チームフィルター
+let currentStatsTeam = 'all'; // 成績表用チームフィルター
 
 // ── データ取得 ──
 async function fetchSheet(name) {
@@ -674,6 +694,7 @@ function buildMatchData(matchRows, appearRows) {
         id,
         date: parseDate(r['日付']),
         type: r['種別'] || '',
+        team: r['チーム区分'] || '',
         tournament: r['大会名'] || '',
         opponent: r['対戦相手名'] || r['対戦相手'] || '',
         halves: [],
@@ -754,14 +775,24 @@ function renderPlayers() {
 // ── 試合結果 ──
 function filterMatches(type, btn) {
   currentFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn[data-group="type"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMatches();
+}
+
+function filterMatchesTeam(team, btn) {
+  currentTeamFilter = team;
+  document.querySelectorAll('.filter-btn[data-group="team"]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderMatches();
 }
 
 function renderMatches() {
   const list = document.getElementById('matchList');
-  const filtered = currentFilter === 'all' ? MATCHES : MATCHES.filter(m => m.type === currentFilter);
+  let filtered = currentFilter === 'all' ? MATCHES : MATCHES.filter(m => m.type === currentFilter);
+  if (currentTeamFilter !== 'all') {
+    filtered = filtered.filter(m => m.team === currentTeamFilter);
+  }
   if(!filtered.length){ list.innerHTML='<div class="empty-msg">該当する試合がありません</div>'; return; }
 
   list.innerHTML = [...filtered].reverse().map(m => {
@@ -814,6 +845,7 @@ function renderMatches() {
       <div class="match-card">
         <div class="match-header">
           <span class="match-badge ${m.type==='公式戦'?'badge-official':'badge-trm'}">${m.type}</span>
+          ${m.team ? `<span class="match-badge ${m.team==='Green'?'badge-green':'badge-white'}">${m.team==='Green'?'🟢':'⚪'} ${m.team}</span>` : ''}
           <div class="match-meta">
             <div class="match-name">${m.tournament}</div>
             <div class="match-opponent">vs ${m.opponent}</div>
@@ -850,15 +882,29 @@ function calcStats(matchList) {
   return {w,d,l,gf,ga,games:matchList.length};
 }
 
+function switchStatsTeam(team, btn) {
+  currentStatsTeam = team;
+  currentRankingTeam = team;
+  document.querySelectorAll('#tab-stats > .rank-tabs .rank-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStats();
+}
+
+function getFilteredMatchesByTeam() {
+  if (currentStatsTeam === 'all') return MATCHES;
+  return MATCHES.filter(m => m.team === currentStatsTeam);
+}
+
 function renderStats() {
   const now = new Date();
   const cm = now.getMonth()+1, cy = now.getFullYear();
   document.getElementById('currentMonthLabel').textContent = cy+'年'+cm+'月';
-  const thisMonth = MATCHES.filter(m => {
+  const base = getFilteredMatchesByTeam();
+  const thisMonth = base.filter(m => {
     const d = new Date(m.date.replace(/\//g,'-'));
     return d.getMonth()+1===cm && d.getFullYear()===cy;
   });
-  const ms = calcStats(thisMonth), ts = calcStats(MATCHES);
+  const ms = calcStats(thisMonth), ts = calcStats(base);
   const mk = s => `
     <div class="stat-card"><div class="stat-label">試合数</div><div class="stat-value">${s.games}</div><div class="stat-sub">games</div></div>
     <div class="stat-card"><div class="stat-label">勝利</div><div class="stat-value" style="color:var(--green-light)">${s.w}</div><div class="stat-sub">wins</div></div>
@@ -879,7 +925,8 @@ function switchRanking(mode, btn) {
 }
 
 function renderRanking() {
-  const targets = currentRankingMode==='official' ? MATCHES.filter(m=>m.type==='公式戦') : MATCHES;
+  let targets = getFilteredMatchesByTeam();
+  if (currentRankingMode==='official') targets = targets.filter(m=>m.type==='公式戦');
   const gm = {};
   targets.forEach(m => m.halves.forEach(h => h.scorers.forEach(s => {
     gm[s.no] = (gm[s.no]||0) + s.goals;

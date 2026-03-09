@@ -934,11 +934,18 @@ function renderRanking() {
   const ranking = Object.entries(gm).map(([no,goals])=>({no:Number(no),goals})).sort((a,b)=>b.goals-a.goals);
   if(!ranking.length){ document.getElementById('rankingList').innerHTML='<div class="empty-msg">得点データがありません</div>'; return; }
   const rc=['gold','silver','bronze'];
+  const medals=['🥇','🥈','🥉'];
+  // 同点は同順位にする
+  let rank = 1;
   document.getElementById('rankingList').innerHTML = ranking.map((r,i) => {
+    if(i > 0 && r.goals < ranking[i-1].goals) rank = i + 1;
+    const pos = rank;
+    const posClass = pos<=3 ? rc[pos-1] : 'other';
+    const posLabel = pos<=3 ? medals[pos-1] : pos;
     const p = playerByNo(r.no);
     const fn = p ? firstName(p.name) : '?';
     return `<div class="rank-row">
-      <div class="rank-pos ${i<3?rc[i]:'other'}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+      <div class="rank-pos ${posClass}">${posLabel}</div>
       <div class="rank-num-badge">${r.no}</div>
       <div class="rank-name">${fn}<div class="rank-kana">${p?p.name:''}</div></div>
       <div class="rank-goals">${r.goals}<span> 点</span></div>

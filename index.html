@@ -851,13 +851,14 @@ function getResult(us, them) {
 }
 
 // ── 写真HTML生成ユーティリティ ──
-function photoHtml(no, cls='') {
-  const url = PHOTO_BASE + no + '.jpg';
-  return `<div class="player-photo${cls ? ' '+cls : ''}">
-    <img src="${url}" alt="#${no}"
-      onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\"player-photo-placeholder\\">${no}</div>'"
-      loading="lazy">
-  </div>`;
+function photoHtml(no, cls) {
+  var url = PHOTO_BASE + no + '.jpg';
+  var clsStr = cls ? ' ' + cls : '';
+  return '<div class="player-photo' + clsStr + '">'
+    + '<img src="' + url + '" alt="#' + no + '"'
+    + ' onerror="this.onerror=null;this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=\\\"player-photo-placeholder\\\">' + no + '</div>\'"'
+    + ' loading="lazy">'
+    + '</div>';
 }
 
 // ── 選手情報 ──
@@ -1072,12 +1073,12 @@ function renderRanking() {
     const p = playerByNo(r.no);
     const fn = p ? firstName(p.name) : '?';
     // 得点ランキングにも顔写真を表示
-    const photoUrl = PHOTO_BASE + r.no + '.jpg';
-    const rankPhotoHtml = `<div class="rank-photo">
-      <img src="${photoUrl}" alt="#${r.no}"
-        onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\"rank-photo-placeholder\\">${r.no}</div>'"
-        loading="lazy">
-    </div>`;
+    var photoUrl = PHOTO_BASE + r.no + '.jpg';
+    var rankPhotoHtml = '<div class="rank-photo">'
+      + '<img src="' + photoUrl + '" alt="#' + r.no + '"'
+      + ' onerror="this.onerror=null;this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=\\\"rank-photo-placeholder\\\">' + r.no + '</div>\'"'
+      + ' loading="lazy">'
+      + '</div>';
     return `<div class="rank-row">
       <div class="rank-pos ${posClass}">${posLabel}</div>
       ${rankPhotoHtml}

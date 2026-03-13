@@ -193,7 +193,7 @@
     background: var(--card-bg);
     border: 1px solid rgba(26,122,60,0.1);
     border-radius: 12px;
-    padding: 18px 14px;
+    padding: 14px 14px 16px;
     text-align: center;
     box-shadow: 0 2px 10px rgba(15,77,37,0.07);
     transition: transform 0.2s, box-shadow 0.2s;
@@ -225,13 +225,43 @@
     display: block; width: 4px; height: 18px;
     background: #ccc; border-radius: 3px;
   }
+
+  /* ── PLAYER PHOTO ── */
+  .player-photo {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: var(--gray-light);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .player-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    transition: transform 0.3s ease;
+    display: block;
+  }
+  .player-card:hover .player-photo img { transform: scale(1.05); }
+  .player-photo-placeholder {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-light), var(--green-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px; font-weight: 700;
+    color: rgba(255,255,255,0.6);
+  }
+
   .player-number {
     font-family: 'Oswald', sans-serif;
-    font-size: 32px; font-weight: 700;
+    font-size: 26px; font-weight: 700;
     color: var(--green);
     line-height: 1;
   }
-  .player-name { font-size: 15px; font-weight: 700; margin-top: 8px; color: var(--dark); }
+  .player-name { font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--dark); }
   .player-kana { font-size: 11px; color: var(--gray); margin-top: 3px; }
   .player-school {
     font-size: 11px; color: var(--green-dark);
@@ -387,6 +417,27 @@
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
+
+  /* ── RANKING PHOTO ── */
+  .rank-photo {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--gray-light);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rank-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .rank-photo-placeholder {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--gray);
+  }
+
   .rank-name { flex: 1; font-weight: 700; font-size: 15px; }
   .rank-kana { font-size: 11px; color: var(--gray); font-weight: 400; }
   .rank-goals {
@@ -522,7 +573,6 @@
   }
   .half-block {
     padding: 14px 16px;
-    /* 内部を4行グリッドにして前半・後半で行を揃える */
     display: grid;
     grid-template-rows: auto auto auto auto;
     align-content: start;
@@ -616,14 +666,12 @@
   <div id="tab-stats" class="section">
     <div class="section-title">成績表</div>
 
-    <!-- チーム切り替えタブ -->
     <div class="rank-tabs" style="margin-bottom:20px;">
       <button class="rank-tab-btn active" onclick="switchStatsTeam('all', this)">全体</button>
       <button class="rank-tab-btn" onclick="switchStatsTeam('Green', this)">🟢 Green</button>
       <button class="rank-tab-btn" onclick="switchStatsTeam('White', this)">⚪ White</button>
     </div>
 
-    <!-- 当月成績 -->
     <div class="card" style="margin-bottom:24px;">
       <div class="card-header">📅 当月の成績
         <span style="margin-left:auto; font-weight:400; font-size:13px; opacity:0.8;" id="currentMonthLabel"></span>
@@ -633,7 +681,6 @@
       </div>
     </div>
 
-    <!-- 通算成績 -->
     <div class="card" style="margin-bottom:24px;">
       <div class="card-header">📈 47期 通算成績</div>
       <div class="card-body">
@@ -641,7 +688,6 @@
       </div>
     </div>
 
-    <!-- 得点ランキング -->
     <div class="card">
       <div class="card-header">🏆 得点ランキング</div>
       <div class="card-body" style="padding-top:14px;">
@@ -680,13 +726,18 @@ if(sessionStorage.getItem('sc47_auth')==='1'){
 // ── API設定 ──
 const API_URL = 'https://script.google.com/macros/s/AKfycbzXQpxCdaHleuy9X8DH3QLw7Wra9LrMpsd2_UUfUR-w01rmS9Fq_kMeXnU3_SCvQxYU/exec';
 
+// ── 写真パス設定 ──
+// GitHubリポジトリの photos/ フォルダに {背番号}.jpg を置いてください
+// 例: photos/2.jpg, photos/5.jpg ...
+const PHOTO_BASE = 'photos/';
+
 let PLAYERS = [];
-let MATCHES = []; // 試合単位にまとめたデータ
+let MATCHES = [];
 let currentFilter = 'all';
-let currentTeamFilter = 'all'; // チーム区分フィルター
+let currentTeamFilter = 'all';
 let currentRankingMode = 'all';
-let currentRankingTeam = 'all'; // ランキング用チームフィルター
-let currentStatsTeam = 'all'; // 成績表用チームフィルター
+let currentRankingTeam = 'all';
+let currentStatsTeam = 'all';
 
 // ── データ取得 ──
 async function fetchSheet(name) {
@@ -703,7 +754,6 @@ function showError(id, msg) {
   if(el) el.innerHTML = '<div class="empty-msg" style="color:#c0392b;">⚠️ ' + msg + '</div>';
 }
 
-// ── データ変換 ──
 function parseDate(val) {
   if(!val) return '';
   if(typeof val === 'string' && val.match(/^\d{4}/)) {
@@ -716,7 +766,6 @@ function parseDate(val) {
   return String(val);
 }
 
-// 列名の揺れ（改行・スペース・表記ゆれ）に対応するユーティリティ
 function getCol(row, ...keys) {
   for (const k of keys) {
     if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
@@ -731,7 +780,6 @@ function getCol(row, ...keys) {
 }
 
 function buildMatchData(matchRows, appearRows) {
-  // 試合IDでグループ化
   const matchMap = {};
   matchRows.forEach(r => {
     const id = r['試合ID'];
@@ -763,7 +811,6 @@ function buildMatchData(matchRows, appearRows) {
     matchMap[id].scoreThem += ht;
   });
 
-  // 出場記録を前後半に紐付け
   appearRows.forEach(r => {
     const id = r['試合ID'];
     const halfLabel = r['前後半'];
@@ -782,7 +829,6 @@ function buildMatchData(matchRows, appearRows) {
     }
   });
 
-  // 出場開始順にソート
   Object.values(matchMap).forEach(m => {
     m.halves.forEach(h => {
       h.players.sort((a,b) => a.start - b.start);
@@ -792,7 +838,6 @@ function buildMatchData(matchRows, appearRows) {
   return Object.values(matchMap).sort((a,b) => a.date.localeCompare(b.date));
 }
 
-// ── ユーティリティ ──
 function playerByNo(no){ return PLAYERS.find(p => p.no === no); }
 function firstName(name) {
   if(!name) return '?';
@@ -805,6 +850,16 @@ function getResult(us, them) {
   return {label:'DRAW', cls:'result-draw'};
 }
 
+// ── 写真HTML生成ユーティリティ ──
+function photoHtml(no, cls='') {
+  const url = PHOTO_BASE + no + '.jpg';
+  return `<div class="player-photo${cls ? ' '+cls : ''}">
+    <img src="${url}" alt="#${no}"
+      onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\"player-photo-placeholder\\">${no}</div>'"
+      loading="lazy">
+  </div>`;
+}
+
 // ── 選手情報 ──
 function renderPlayers() {
   const grid = document.getElementById('playerGrid');
@@ -815,6 +870,7 @@ function renderPlayers() {
 
   const cardHtml = (p, isAlumni) => `
     <div class="player-card${isAlumni ? ' alumni' : ''}">
+      ${photoHtml(p.no)}
       <div class="player-number">#${p.no}</div>
       <div class="player-name">${firstName(p.name)}</div>
       <div class="player-kana">${p.name}</div>
@@ -940,7 +996,6 @@ function renderMatches() {
         <div class="halves-container">${halvesHtml}</div>
       </div>`;
   }).join('');
-  // 前半・後半の各セクション高さを同期
   requestAnimationFrame(syncHalfHeights);
 }
 
@@ -1008,7 +1063,6 @@ function renderRanking() {
   if(!ranking.length){ document.getElementById('rankingList').innerHTML='<div class="empty-msg">得点データがありません</div>'; return; }
   const rc=['gold','silver','bronze'];
   const medals=['🥇','🥈','🥉'];
-  // 同点は同順位にする
   let rank = 1;
   document.getElementById('rankingList').innerHTML = ranking.map((r,i) => {
     if(i > 0 && r.goals < ranking[i-1].goals) rank = i + 1;
@@ -1017,9 +1071,16 @@ function renderRanking() {
     const posLabel = pos<=3 ? medals[pos-1] : pos;
     const p = playerByNo(r.no);
     const fn = p ? firstName(p.name) : '?';
+    // 得点ランキングにも顔写真を表示
+    const photoUrl = PHOTO_BASE + r.no + '.jpg';
+    const rankPhotoHtml = `<div class="rank-photo">
+      <img src="${photoUrl}" alt="#${r.no}"
+        onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\"rank-photo-placeholder\\">${r.no}</div>'"
+        loading="lazy">
+    </div>`;
     return `<div class="rank-row">
       <div class="rank-pos ${posClass}">${posLabel}</div>
-      <div class="rank-num-badge">${r.no}</div>
+      ${rankPhotoHtml}
       <div class="rank-name">${fn}<div class="rank-kana">${p?p.name:''}</div></div>
       <div class="rank-goals">${r.goals}<span> 点</span></div>
     </div>`;
@@ -1036,7 +1097,6 @@ function syncHalfHeights() {
       const a = blocks[0].querySelector('.' + cls);
       const b = blocks[1].querySelector('.' + cls);
       if (!a || !b) return;
-      // いったんautoに戻してから計測
       a.style.height = 'auto';
       b.style.height = 'auto';
       const h = Math.max(a.offsetHeight, b.offsetHeight);
@@ -1045,7 +1105,6 @@ function syncHalfHeights() {
     });
   });
 }
-
 
 function showTab(name) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));

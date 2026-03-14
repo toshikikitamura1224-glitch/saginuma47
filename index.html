@@ -1063,7 +1063,9 @@ function renderRanking() {
   targets.forEach(m => m.halves.forEach(h => h.scorers.forEach(s => {
     gm[s.no] = (gm[s.no]||0) + s.goals;
   })));
-  const ranking = Object.entries(gm).map(([no,goals])=>({no:Number(no),goals})).sort((a,b)=>b.goals-a.goals);
+  const ranking = Object.entries(gm).map(([no,goals])=>({no:Number(no),goals}))
+    .filter(r => { const p = playerByNo(r.no); return p && p.active !== false; })
+    .sort((a,b)=>b.goals-a.goals);
   if(!ranking.length){ document.getElementById('rankingList').innerHTML='<div class="empty-msg">得点データがありません</div>'; return; }
   const rc=['gold','silver','bronze'];
   const medals=['🥇','🥈','🥉'];

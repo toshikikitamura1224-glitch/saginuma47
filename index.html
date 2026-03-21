@@ -330,6 +330,28 @@ main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; position: rel
 
 /* ── フィルター ── */
 .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border-bright);
+  border-radius: 2px; padding: 6px 12px;
+  flex: 1; min-width: 200px; max-width: 360px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-box:focus-within { border-color: var(--green); box-shadow: 0 0 10px rgba(0,224,85,.1); }
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--mono); font-size: 13px;
+  flex: 1; letter-spacing: .04em;
+}
+.search-box input::placeholder { color: var(--text-dim); }
+.search-icon { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+.search-count { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-left: 4px; letter-spacing: .08em; }
+.search-clear {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-dim); font-size: 14px; padding: 0 2px;
+  line-height: 1; transition: color .15s;
+}
+.search-clear:hover { color: var(--green); }
 .filter-label { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: .1em; }
 .filter-btn {
   padding: 5px 14px; border-radius: 2px;
@@ -588,6 +610,18 @@ main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; position: rel
   <!-- TAB2: 試合結果 -->
   <div id="tab-matches" class="section">
     <div class="section-title">試合結果</div>
+    <!-- 検索ボックス -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="matchSearch" placeholder="対戦相手・大会名で検索..." oninput="onSearchInput()">
+        <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" style="display:none;">✕</button>
+      </div>
+      <select id="scorerFilter" onchange="renderMatches()" style="background:var(--surface2);border:1px solid var(--border-bright);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 12px;outline:none;cursor:pointer;letter-spacing:.04em;">
+        <option value="">⚽ 得点者で絞り込み...</option>
+      </select>
+      <span class="search-count" id="searchCount"></span>
+    </div>
     <div class="filter-row">
       <span class="filter-label">種別 :</span>
       <button class="filter-btn active" onclick="filterMatches('all', this)" data-group="type">ALL</button>
@@ -664,6 +698,7 @@ let PLAYERS = [];
 let MATCHES = [];
 let currentFilter = 'all';
 let currentTeamFilter = 'all';
+let currentSearchQuery = '';
 let currentRankingMode = 'all';
 let currentRankingTeam = 'all';
 let currentStatsTeam = 'all';
@@ -766,6 +801,17 @@ function renderPlayers() {
 }
 
 // ── 試合結果 ──
+function onSearchInput() {
+  currentSearchQuery = document.getElementById('matchSearch').value.trim();
+  document.getElementById('searchClearBtn').style.display = currentSearchQuery ? 'block' : 'none';
+  renderMatches();
+}
+function clearSearch() {
+  document.getElementById('matchSearch').value = '';
+  currentSearchQuery = '';
+  document.getElementById('searchClearBtn').style.display = 'none';
+  renderMatches();
+}
 function filterMatches(type, btn) {
   currentFilter = type;
   document.querySelectorAll('.filter-btn[data-group="type"]').forEach(b => b.classList.remove('active'));
@@ -780,7 +826,29 @@ function renderMatches() {
   const list = document.getElementById('matchList');
   let filtered = currentFilter==='all' ? MATCHES : MATCHES.filter(m => m.type===currentFilter);
   if(currentTeamFilter!=='all') filtered = filtered.filter(m => m.team===currentTeamFilter);
-  if(!filtered.length){ list.innerHTML='<div class="empty-msg">// 該当する試合がありません</div>'; return; }
+  if(currentSearchQuery) {
+    const q = currentSearchQuery.toLowerCase();
+    filtered = filtered.filter(m =>
+      m.opponent.toLowerCase().includes(q) ||
+      m.tournament.toLowerCase().includes(q)
+    );
+  }
+  // 得点者プルダウン絞り込み
+  const scorerSelect = document.getElementById('scorerFilter');
+  const scorerNo = scorerSelect ? Number(scorerSelect.value) : 0;
+  if(scorerNo) {
+    filtered = filtered.filter(m =>
+      m.halves.some(h => h.scorers.some(s => s.no === scorerNo))
+    );
+  }
+  const countEl = document.getElementById('searchCount');
+  if(countEl) {
+    countEl.textContent = currentSearchQuery ? filtered.length + ' 件ヒット' : '';
+  }
+  if(!filtered.length){
+    list.innerHTML = '<div class="empty-msg">' + (currentSearchQuery ? '// 「' + currentSearchQuery + '」に一致する試合はありません' : '// 該当する試合がありません') + '</div>';
+    return;
+  }
   list.innerHTML = [...filtered].reverse().map(m => {
     const res = getResult(m.scoreUs, m.scoreThem);
     const hasTwo = m.halves.length === 2;
@@ -931,6 +999,20 @@ async function init() {
     }));
     MATCHES = buildMatchData(matchesRaw, appearsRaw);
     renderPlayers(); renderMatches(); renderStats();
+    // 得点者プルダウンを生成（実際に得点したことがある選手のみ）
+    const scoredNos = new Set();
+    MATCHES.forEach(m => m.halves.forEach(h => h.scorers.forEach(s => scoredNos.add(s.no))));
+    const sel = document.getElementById('scorerFilter');
+    if(sel) {
+      const scorers = PLAYERS.filter(p => scoredNos.has(p.no) && p.active !== false)
+        .sort((a,b) => a.no - b.no);
+      scorers.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.no;
+        opt.textContent = '#' + p.no + ' ' + firstName(p.name);
+        sel.appendChild(opt);
+      });
+    }
   } catch(err) {
     console.error(err);
     showError('playerGrid','データの読み込みに失敗しました。再読み込みしてください。');

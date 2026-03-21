@@ -443,6 +443,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; position: rel
   transition: background .15s;
 }
 .yt-link:hover { background: var(--red-dim); }
+.yt-backup { color: var(--text-muted); border-color: var(--border-bright); margin-left: 6px; }
+.yt-backup:hover { background: var(--green-dim); color: var(--green); border-color: var(--green); }
 .no-data { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
 
 /* ── 成績表 ── */
@@ -700,7 +702,7 @@ function buildMatchData(matchRows, appearRows) {
     const halfLabel = r['前後半']||'前後半';
     const hu = Number(getCol(r,'自チーム\n得点','自チーム得点','自チーム 得点')??0);
     const ht = Number(getCol(r,'相手\n得点','相手得点','相手 得点')??0);
-    matchMap[id].halves.push({ label:halfLabel, scoreUs:hu, scoreThem:ht, youtube:r['YouTube URL']||'', players:[], scorers:[] });
+    matchMap[id].halves.push({ label:halfLabel, scoreUs:hu, scoreThem:ht, youtube:r['YouTube URL']||'', youtubeBackup:r['YouTube URL（バックアップ）']||'', players:[], scorers:[] });
     matchMap[id].scoreUs += hu; matchMap[id].scoreThem += ht;
   });
   appearRows.forEach(r => {
@@ -792,7 +794,10 @@ function renderMatches() {
         return `<span class="player-tag">#${ap.no} ${fn}${subInfo}</span>`;
       }).join('');
       const scorerTags = h.scorers.length ? h.scorers.map(s=>{ const p=playerByNo(s.no); return `<span class="player-tag scorer-tag">⚽ ${p?firstName(p.name):'?'} ×${s.goals}</span>`; }).join('') : '<span class="no-data">なし</span>';
-      const ytBtn = h.youtube ? `<a href="${h.youtube}" target="_blank" class="yt-link">▶ YouTube</a>` : '<span class="no-data">なし</span>';
+      const ytBtn = (h.youtube || h.youtubeBackup)
+        ? (h.youtube ? `<a href="${h.youtube}" target="_blank" class="yt-link">▶ メイン</a>` : '')
+          + (h.youtubeBackup ? `<a href="${h.youtubeBackup}" target="_blank" class="yt-link yt-backup">▶ バックアップ</a>` : '')
+        : '<span class="no-data">なし</span>';
       return `<div class="half-block${fw}">
         <div class="half-section-title"><div class="half-block-title${tc}">${h.label}</div></div>
         <div class="half-section-players"><div class="detail-label">出場選手</div><div class="detail-content">${playerTags||'<span class="no-data">未入力</span>'}</div></div>
